@@ -18,7 +18,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden; /* Evita el scroll */
+            overflow: hidden;
             background-color: #f4f4f4;
             text-align: center;
         }
@@ -31,9 +31,26 @@
         }
 
         #countdown {
-            font-size: 72px; /* Reduce el tamaño para mantenerlo dentro de la pantalla */
-            color: red;
+            font-size: 72px;
             margin-top: 10px;
+        }
+
+        @keyframes fondoParpadeo {
+            0%, 100% { background-color: white; }
+            50% { background-color: red; }
+        }
+
+        @keyframes textoParpadeo {
+            0%, 100% { color: red; }
+            50% { color: white; }
+        }
+
+        body.parpadeando {
+            animation: fondoParpadeo 0.5s infinite;
+        }
+
+        #countdown.parpadeando-texto {
+            animation: textoParpadeo 0.5s infinite;
         }
     </style>
 </head>
@@ -42,49 +59,51 @@
     <div id="countdown"></div>
 
     <script>
-        // Fecha objetivo
         const targetDate = new Date("March 25, 2025 09:00:00").getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
             const distance = targetDate - now;
 
-            // Calcular días, horas, minutos y segundos restantes
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
             const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            // Mostrar cuenta regresiva en una sola línea
             document.getElementById("countdown").innerHTML = `${days} días ${hours}:${minutes}:${seconds}`;
 
-            // Referencia a la imagen
             const img = document.getElementById("metaImage");
-
-            // Espacio disponible en la pantalla
             const availableHeight = window.innerHeight - document.getElementById("countdown").offsetHeight - 20;
 
-            // Lógica de crecimiento de la imagen
             if (days > 10) {
-                img.style.width = "300px"; // Tamaño fijo hasta 11 días restantes
+                img.style.width = "300px";
             } else if (days > 0) {
-                const progress = (10 - days) / 10; // Progresión desde 11 días hasta 0
+                const progress = (10 - days) / 10;
                 const newSize = 300 + progress * (availableHeight - 300);
                 img.style.width = `${newSize}px`;
             } else {
-                img.style.width = `${availableHeight}px`; // Llena la pantalla sin generar scroll
+                img.style.width = `${availableHeight}px`;
             }
 
-            // Si la cuenta atrás ha terminado
+            // Añadir parpadeo si quedan menos de 3 días
+            if (days <= 4 && distance > 0) {
+                document.body.classList.add("parpadeando");
+                document.getElementById("countdown").classList.add("parpadeando-texto");
+            } else {
+                document.body.classList.remove("parpadeando");
+                document.getElementById("countdown").classList.remove("parpadeando-texto");
+            }
+
             if (distance < 0) {
                 clearInterval(interval);
                 document.getElementById("countdown").innerHTML = "¡La meta ha llegado!";
+                document.body.classList.remove("parpadeando");
+                document.getElementById("countdown").classList.remove("parpadeando-texto");
             }
         }
 
-        // Actualizar cada segundo
         const interval = setInterval(updateCountdown, 1000);
-        updateCountdown(); // Ejecutar una vez al inicio
+        updateCountdown();
     </script>
 </body>
 </html>
